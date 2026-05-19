@@ -11,6 +11,7 @@ import 'package:uuid/uuid.dart';
 abstract class FlutterXtool {
   PackageInfo? packageInfo;
   BaseDeviceInfo? deviceInfo;
+  UserDevice? _userDevice;
   GetStorage? _storage;
 
   GetStorage get box {
@@ -19,6 +20,7 @@ abstract class FlutterXtool {
 
   /// 初始化
   Future initData() async {
+    await GetStorage.init();
     packageInfo = await PackageInfo.fromPlatform();
     deviceInfo = await DeviceInfoPlugin().deviceInfo;
   }
@@ -135,14 +137,16 @@ abstract class FlutterXtool {
   }
 
   /// 用户唯一id device_id
-  Future<UserDevice> obtionDeviceId() async {
-    final cacheKey = 'userChainkey';
+  Future<UserDevice> getDeviceId() async {
+    if (_userDevice != null) return _userDevice!;
+    final cacheKey = 'userChainKey';
     bool isNew = false;
     String? deviceID = box.read(cacheKey);
     if (deviceID == null) {
       if (Platform.isAndroid) {
         const androidIdPlugin = AndroidId();
         deviceID = await androidIdPlugin.getId() ?? "";
+        isNew = true;
       } else {
         final storage = const FlutterSecureStorage();
         deviceID = await storage.read(key: cacheKey);
@@ -154,7 +158,8 @@ abstract class FlutterXtool {
       }
       box.write(cacheKey, deviceID);
     }
-    return UserDevice(id: deviceID, isNew: isNew);
+    _userDevice = UserDevice(id: deviceID, isNew: isNew);
+    return _userDevice!;
   }
 }
 

@@ -30,8 +30,9 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(title: const Text('Plugin example app')),
         body: Center(
           child: TextButton(
-            onPressed: () {
-              log(utils.packageInfo?.version ?? '--');
+            onPressed: () async {
+              final data = await utils.getDeviceId();
+              log(data.id);
             },
             child: const Text('点击'),
           ),
