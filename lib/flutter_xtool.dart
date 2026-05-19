@@ -14,7 +14,7 @@ abstract class FlutterXtool {
   UserDevice? _userDevice;
   GetStorage? _storage;
 
-  GetStorage get box {
+  GetStorage get _box {
     return _storage ??= GetStorage();
   }
 
@@ -117,10 +117,10 @@ abstract class FlutterXtool {
   /// 谷歌的广告ID
   Future<String> getGoogleAdId() async {
     final cacheKey = 'googleAdKey';
-    String? id = box.read(cacheKey);
+    String? id = read(cacheKey);
     if (id == null) {
       id = await AdvertisingId.id(true) ?? '';
-      box.write(cacheKey, id);
+      write(cacheKey, id);
     }
     return id;
   }
@@ -128,10 +128,10 @@ abstract class FlutterXtool {
   /// 用户唯一id字段 distinct_id
   String? get getDistinctId {
     final cachekey = 'userDistinctKey';
-    String? uuid = box.read(cachekey);
+    String? uuid = read(cachekey);
     if (uuid == null) {
       uuid = const Uuid().v4();
-      box.write(cachekey, uuid);
+      write(cachekey, uuid);
     }
     return uuid;
   }
@@ -141,7 +141,7 @@ abstract class FlutterXtool {
     if (_userDevice != null) return _userDevice!;
     final cacheKey = 'userChainKey';
     bool isNew = false;
-    String? deviceID = box.read(cacheKey);
+    String? deviceID = read(cacheKey);
     if (deviceID == null) {
       if (Platform.isAndroid) {
         const androidIdPlugin = AndroidId();
@@ -156,10 +156,30 @@ abstract class FlutterXtool {
           isNew = true;
         }
       }
-      box.write(cacheKey, deviceID);
+      write(cacheKey, deviceID);
     }
     _userDevice = UserDevice(id: deviceID, isNew: isNew);
     return _userDevice!;
+  }
+
+  T? read<T>(String key) {
+    return _box.read(key);
+  }
+
+  T getKeys<T>() {
+    return _box.getKeys();
+  }
+
+  T getValues<T>() {
+    return _box.getValues();
+  }
+
+  Future<void> write(String key, dynamic value) {
+    return _box.write(key, value);
+  }
+
+  Future<void> remove(String key) {
+    return _box.remove(key);
   }
 }
 
