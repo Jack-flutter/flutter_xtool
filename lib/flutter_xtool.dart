@@ -4,7 +4,6 @@ import 'package:advertising_id/advertising_id.dart';
 import 'package:android_id/android_id.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:uuid/uuid.dart';
 
@@ -12,18 +11,18 @@ abstract class FlutterXtool {
   PackageInfo? packageInfo;
   BaseDeviceInfo? deviceInfo;
   UserDevice? _userDevice;
-  GetStorage? _storage;
-
-  GetStorage get _box {
-    return _storage ??= GetStorage();
-  }
 
   /// 初始化
   Future initData() async {
-    await GetStorage.init();
     packageInfo = await PackageInfo.fromPlatform();
     deviceInfo = await DeviceInfoPlugin().deviceInfo;
   }
+
+  /// 保存数据
+  void saveCacheData(String key, String value);
+
+  /// 获取数据
+  String getCacheData(String key);
 
   /// 手机系统 device_model
   String? get getDeviceModel {
@@ -117,10 +116,10 @@ abstract class FlutterXtool {
   /// 谷歌的广告ID
   Future<String> getGoogleAdId() async {
     final cacheKey = 'googleAdKey';
-    String? id = read(cacheKey);
-    if (id == null) {
+    String id = getCacheData(cacheKey);
+    if (id.isEmpty) {
       id = await AdvertisingId.id(true) ?? '';
-      write(cacheKey, id);
+      saveCacheData(cacheKey, id);
     }
     return id;
   }
@@ -128,10 +127,10 @@ abstract class FlutterXtool {
   /// 用户唯一id字段 distinct_id
   String? get getDistinctId {
     final cachekey = 'userDistinctKey';
-    String? uuid = read(cachekey);
-    if (uuid == null) {
+    String uuid = getCacheData(cachekey);
+    if (uuid.isEmpty) {
       uuid = const Uuid().v4();
-      write(cachekey, uuid);
+      saveCacheData(cachekey, uuid);
     }
     return uuid;
   }
@@ -141,45 +140,25 @@ abstract class FlutterXtool {
     if (_userDevice != null) return _userDevice!;
     final cacheKey = 'userChainKey';
     bool isNew = false;
-    String? deviceID = read(cacheKey);
-    if (deviceID == null) {
+    String deviceID = getCacheData(cacheKey);
+    if (deviceID.isEmpty) {
       if (Platform.isAndroid) {
         const androidIdPlugin = AndroidId();
         deviceID = await androidIdPlugin.getId() ?? "";
         isNew = true;
       } else {
         final storage = const FlutterSecureStorage();
-        deviceID = await storage.read(key: cacheKey);
-        if (deviceID == null) {
+        deviceID = await storage.read(key: cacheKey) ?? '';
+        if (deviceID.isEmpty) {
           deviceID = const Uuid().v4();
           storage.write(key: cacheKey, value: deviceID);
           isNew = true;
         }
       }
-      write(cacheKey, deviceID);
+      saveCacheData(cacheKey, deviceID);
     }
     _userDevice = UserDevice(id: deviceID, isNew: isNew);
     return _userDevice!;
-  }
-
-  T? read<T>(String key) {
-    return _box.read(key);
-  }
-
-  T getKeys<T>() {
-    return _box.getKeys();
-  }
-
-  T getValues<T>() {
-    return _box.getValues();
-  }
-
-  Future<void> write(String key, dynamic value) {
-    return _box.write(key, value);
-  }
-
-  Future<void> remove(String key) {
-    return _box.remove(key);
   }
 }
 

@@ -42,4 +42,15 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-class Utils extends FlutterXtool {}
+class Utils extends FlutterXtool {
+  @override
+  String getCacheData(String key) {
+    // TODO: implement getCacheData
+    return '';
+  }
+
+  @override
+  void saveCacheData(String key, String value) {
+    // TODO: implement saveCacheData
+  }
+}
