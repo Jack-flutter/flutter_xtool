@@ -11,9 +11,7 @@ dependencies:
 
   flutter:
     sdk: flutter
-  flutter_secure_storage: ^10.2.0
-  package_info_plus: ^10.1.0
-  device_info_plus: ^13.1.0
+  flutter_secure_storage: ^10.0.0
   advertising_id: ^2.7.1
   android_id: ^0.5.1
   path: ^1.9.1

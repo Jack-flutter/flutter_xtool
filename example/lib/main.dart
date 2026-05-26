@@ -19,7 +19,6 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void initState() {
-    utils.initData();
     super.initState();
   }
 
@@ -53,4 +52,28 @@ class Utils extends FlutterXtool {
   void saveCacheData(String key, String value) {
     // TODO: implement saveCacheData
   }
+
+  @override
+  // TODO: implement getAndroidId
+  String? get getAndroidId => throw UnimplementedError();
+
+  @override
+  // TODO: implement getBundleId
+  String? get getBundleId => throw UnimplementedError();
+
+  @override
+  // TODO: implement getIdfv
+  String? get getIdfv => throw UnimplementedError();
+
+  @override
+  // TODO: implement getManufacturer
+  String? get getManufacturer => throw UnimplementedError();
+
+  @override
+  // TODO: implement getOsVersion
+  String get getOsVersion => throw UnimplementedError();
+
+  @override
+  // TODO: implement getVersion
+  String? get getVersion => throw UnimplementedError();
 }
