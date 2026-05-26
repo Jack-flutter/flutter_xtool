@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:uuid/uuid.dart';
 import 'package:android_id/android_id.dart';
 import 'package:advertising_id/advertising_id.dart';
@@ -6,6 +8,14 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 abstract class FlutterXtool {
   UserDevice? _userDevice;
+  PackageInfo? packageInfo;
+  BaseDeviceInfo? deviceInfo;
+
+  /// 初始化
+  Future initData() async {
+    packageInfo = await PackageInfo.fromPlatform();
+    deviceInfo = await DeviceInfoPlugin().deviceInfo;
+  }
 
   /// 保存数据
   void saveCacheData(String key, String value);
@@ -14,19 +24,53 @@ abstract class FlutterXtool {
   String getCacheData(String key);
 
   /// 应用版本 app_version
-  String? get getVersion;
+  String? get getVersion {
+    return packageInfo?.version;
+  }
 
   /// ios的广告原值 idfv
-  String? get getIdfv;
+  String? get getIdfv {
+    if (Platform.isIOS) {
+      final info = deviceInfo as IosDeviceInfo?;
+      return info?.identifierForVendor;
+    }
+    return null;
+  }
 
   /// app包名 bundle_id
-  String? get getBundleId;
+  String? get getBundleId {
+    return '${packageInfo?.packageName}';
+  }
 
   /// 安卓id App需要有该字段 android_id
-  String? get getAndroidId;
+  String? get getAndroidId {
+    if (Platform.isAndroid) {
+      final info = deviceInfo as AndroidDeviceInfo?;
+      return info?.id;
+    }
+    return null;
+  }
 
   /// 厂商类型 manufacturer
-  String? get getManufacturer;
+  String? get getManufacturer {
+    if (Platform.isAndroid) {
+      final info = deviceInfo as AndroidDeviceInfo?;
+      return info?.manufacturer;
+    } else {
+      return 'Apple';
+    }
+  }
+
+  /// 系统版本号 os_version
+  String get getOsVersion {
+    if (Platform.isAndroid) {
+      final info = deviceInfo as AndroidDeviceInfo?;
+      return info?.version.release ?? '1';
+    } else {
+      final info = deviceInfo as IosDeviceInfo?;
+      return info?.systemVersion ?? '1';
+    }
+  }
 
   /// 手机系统 device_model
   String? get getDeviceModel {
@@ -47,9 +91,6 @@ abstract class FlutterXtool {
   String get getLogId {
     return const Uuid().v4();
   }
-
-  /// 系统版本号 os_version
-  String get getOsVersion;
 
   /// 客户端时间，毫秒数 client_ts
   int get getClientTs {
