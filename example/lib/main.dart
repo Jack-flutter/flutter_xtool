@@ -32,7 +32,7 @@ class _MyAppState extends State<MyApp> {
           child: TextButton(
             onPressed: () async {
               final data = await utils.getDeviceId();
-              log(data.id);
+              log(data);
             },
             child: const Text('点击'),
           ),

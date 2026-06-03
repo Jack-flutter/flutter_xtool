@@ -1,15 +1,16 @@
 import 'dart:io';
+
+import 'package:advertising_id/advertising_id.dart';
+import 'package:android_id/android_id.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:uuid/uuid.dart';
-import 'package:android_id/android_id.dart';
-import 'package:advertising_id/advertising_id.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 abstract class FlutterXtool {
-  UserDevice? _userDevice;
   PackageInfo? packageInfo;
   BaseDeviceInfo? deviceInfo;
+  bool isNew = false;
 
   /// 初始化
   Future initData() async {
@@ -135,10 +136,8 @@ abstract class FlutterXtool {
   }
 
   /// 用户唯一id device_id
-  Future<UserDevice> getDeviceId() async {
-    if (_userDevice != null) return _userDevice!;
+  Future<String> getDeviceId() async {
     final cacheKey = 'userChainKey';
-    bool isNew = false;
     String deviceID = getCacheData(cacheKey);
     if (deviceID.isEmpty) {
       if (Platform.isAndroid) {
@@ -156,14 +155,6 @@ abstract class FlutterXtool {
       }
       saveCacheData(cacheKey, deviceID);
     }
-    _userDevice = UserDevice(id: deviceID, isNew: isNew);
-    return _userDevice!;
+    return deviceID;
   }
-}
-
-class UserDevice {
-  final String id;
-  final bool isNew;
-
-  UserDevice({required this.id, required this.isNew});
 }
